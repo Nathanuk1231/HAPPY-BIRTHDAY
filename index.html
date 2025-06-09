@@ -11,29 +11,54 @@
       background-size: 600% 600%;
       animation: backgroundMove 20s ease infinite;
       font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
-      flex-direction: column;
+      color: white;
+      user-select: none;
     }
     @keyframes backgroundMove {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
+
+    /* Top fixed toggle button */
+    #toggleViewBtn {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10000;
+      padding: 12px 28px;
+      font-size: 1.25rem;
+      border: none;
+      border-radius: 1rem;
+      background: linear-gradient(45deg, #ff0057, #ff7a00);
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 15px #ff0057;
+      transition: background 0.3s ease;
+    }
+    #toggleViewBtn:hover {
+      background: linear-gradient(45deg, #ff7a00, #ff0057);
+    }
+
+    /* Container for birthday message */
     .container {
-      text-align: center;
-      padding: 2rem;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       backdrop-filter: blur(10px);
       background: rgba(255,255,255,0.05);
       border-radius: 2rem;
       box-shadow: 0 0 30px rgba(0,0,0,0.3);
       border: 2px solid rgba(255,255,255,0.2);
-      animation: fadeIn 2s ease-in-out;
+      padding: 2rem;
+      text-align: center;
       max-width: 90vw;
-      position: relative;
-      z-index: 10;
+      margin: 0 auto;
+      animation: fadeIn 2s ease-in-out;
     }
     @keyframes fadeIn {
       from {opacity: 0; transform: translateY(20px);}
@@ -49,15 +74,18 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       transition: background-position 0.05s;
+      user-select: none;
     }
     p {
-      color: white;
       font-size: 5vw;
       margin-top: 1rem;
       margin-bottom: 2rem;
+      user-select: none;
     }
-    button {
-      font-size: 1.8rem;
+
+    /* Music control button */
+    #playPauseBtn {
+      font-size: 1.5rem;
       padding: 0.8rem 2rem;
       border: none;
       border-radius: 1rem;
@@ -66,10 +94,13 @@
       cursor: pointer;
       box-shadow: 0 0 15px #ff0057;
       transition: background 0.3s ease;
+      user-select: none;
     }
-    button:hover {
+    #playPauseBtn:hover {
       background: linear-gradient(45deg, #ff7a00, #ff0057);
     }
+
+    /* Confetti canvas */
     #confetti-canvas {
       position: fixed;
       pointer-events: none;
@@ -79,29 +110,69 @@
       z-index: 9999;
       display: none;
     }
+
+    /* Balloon pop game container */
+    #gameContainer {
+      display: none;
+      height: 100vh;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(5px);
+      overflow: hidden;
+      position: relative;
+      border-radius: 2rem;
+      box-shadow: 0 0 30px rgba(0,0,0,0.3);
+      max-width: 90vw;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* Balloon styling */
+    .balloon {
+      position: absolute;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      cursor: pointer;
+      box-shadow: inset -3px -5px 10px rgba(255,255,255,0.6);
+      user-select: none;
+      transition: transform 0.2s ease;
+    }
+    .balloon:active {
+      transform: scale(0.8);
+    }
   </style>
 </head>
 <body>
-  <div class="container">
+
+  <button id="toggleViewBtn">Play Balloon Pop Game</button>
+
+  <!-- Birthday container -->
+  <div id="birthdayContainer" class="container">
     <h1 id="title">Happy Birthday!</h1>
     <p>Have the best day ever 🎉</p>
     <button id="playPauseBtn">Pause Music</button>
   </div>
 
-  <audio 
-    id="birthdaySong" 
-    src="https://raw.githubusercontent.com/Nathanuk1231/HAPPY-BIRTHDAY/main/no%20copyright%20music%20lofi%20type%20beat%20sparky%20night%20free%20vlog%20music.mp3" 
-    preload="auto" autoplay loop></audio>
+  <!-- Balloon Pop Game container -->
+  <div id="gameContainer"></div>
 
   <canvas id="confetti-canvas"></canvas>
 
+  <audio
+    id="birthdaySong"
+    src="https://raw.githubusercontent.com/Nathanuk1231/HAPPY-BIRTHDAY/main/no%20copyright%20music%20lofi%20type%20beat%20sparky%20night%20free%20vlog%20music.mp3"
+    preload="auto" autoplay loop></audio>
+
   <script>
-    const title = document.getElementById('title');
+    // Elements
+    const toggleBtn = document.getElementById('toggleViewBtn');
+    const birthdayContainer = document.getElementById('birthdayContainer');
+    const gameContainer = document.getElementById('gameContainer');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const birthdaySong = document.getElementById('birthdaySong');
     const confettiCanvas = document.getElementById('confetti-canvas');
     const ctx = confettiCanvas.getContext('2d');
+    const title = document.getElementById('title');
 
+    // Setup confetti canvas size
     function resizeCanvas() {
       confettiCanvas.width = window.innerWidth;
       confettiCanvas.height = window.innerHeight;
@@ -109,6 +180,7 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
+    // Confetti setup
     const confettiCount = 150;
     const confettiColors = ['#ff0057', '#ff7a00', '#fffa00', '#00ffab', '#00d4ff', '#8b00ff'];
     const confettiParticles = [];
@@ -150,6 +222,7 @@
     }
 
     function createConfetti() {
+      confettiParticles.length = 0;
       for(let i = 0; i < confettiCount; i++) {
         confettiParticles.push(new ConfettiParticle());
       }
@@ -166,14 +239,13 @@
       }
     }
 
-    let confettiActive = false;
-    createConfetti();
-
     // Start confetti automatically with music
-    confettiActive = true;
+    let confettiActive = true;
+    createConfetti();
     confettiCanvas.style.display = 'block';
     animateConfetti();
 
+    // Play/Pause music button
     playPauseBtn.addEventListener('click', () => {
       if (birthdaySong.paused) {
         birthdaySong.play();
@@ -191,7 +263,7 @@
       }
     });
 
-    // Gyroscope effect
+    // DeviceOrientation effect on title
     if (window.DeviceOrientationEvent) {
       window.addEventListener('deviceorientation', (e) => {
         const gamma = e.gamma || 0;
@@ -205,6 +277,75 @@
     } else {
       alert("Your device doesn't support gyroscope.");
     }
+
+    // Balloon pop game code
+    let balloons = [];
+    const balloonColors = ['#ff0057', '#ff7a00', '#fffa00', '#00ffab', '#00d4ff', '#8b00ff'];
+
+    function createBalloon() {
+      const balloon = document.createElement('div');
+      balloon.classList.add('balloon');
+      balloon.style.backgroundColor = balloonColors[Math.floor(Math.random() * balloonColors.length)];
+      balloon.style.width = `${Math.random() * 60 + 40}px`;
+      balloon.style.height = balloon.style.width;
+      balloon.style.left = `${Math.random() * (gameContainer.clientWidth - 60)}px`;
+      balloon.style.top = `${Math.random() * (gameContainer.clientHeight - 60)}px`;
+      balloon.style.zIndex = 10;
+      balloon.style.userSelect = 'none';
+
+      balloon.addEventListener('click', () => {
+        balloonPop(balloon);
+      });
+      gameContainer.appendChild(balloon);
+      balloons.push(balloon);
+    }
+
+    function balloonPop(balloon) {
+      balloon.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+      balloon.style.transform = 'scale(0)';
+      balloon.style.opacity = '0';
+      setTimeout(() => {
+        if (balloon.parentNode) balloon.parentNode.removeChild(balloon);
+        balloons = balloons.filter(b => b !== balloon);
+        if (balloons.length === 0) {
+          alert('🎉 You popped all the balloons! Happy Birthday! 🎉');
+          startGame();
+        }
+      }, 300);
+    }
+
+    function startGame() {
+      gameContainer.innerHTML = '';
+      balloons = [];
+      const numBalloons = 20;
+      for(let i = 0; i < numBalloons; i++) {
+        createBalloon();
+      }
+    }
+
+    // Toggle between birthday message and game
+    let onGame = false;
+    toggleBtn.addEventListener('click', () => {
+      if (onGame) {
+        // Back to birthday message
+        gameContainer.style.display = 'none';
+        birthdayContainer.style.display = 'flex';
+        toggleBtn.textContent = 'Play Balloon Pop Game';
+        confettiActive = true;
+        confettiCanvas.style.display = 'block';
+        animateConfetti();
+      } else {
+        // Show game
+        birthdayContainer.style.display = 'none';
+        gameContainer.style.display = 'block';
+        toggleBtn.textContent = 'Back to Birthday';
+        confettiActive = false;
+        confettiCanvas.style.display = 'none';
+        startGame();
+      }
+      onGame = !onGame;
+    });
+
   </script>
 </body>
 </html>
