@@ -2,87 +2,88 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Happy Birthday!</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      background: linear-gradient(45deg, red, orange, yellow, green, cyan, blue, violet, pink, lime, gold);
-      background-size: 500% 500%;
-      animation: moveBg 20s linear infinite;
+      background: linear-gradient(120deg, red, orange, yellow, green, cyan, blue, violet);
+      background-size: 600% 600%;
+      animation: backgroundMove 20s ease infinite;
+      font-family: 'Segoe UI', sans-serif;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       overflow: hidden;
     }
 
-    @keyframes moveBg {
+    @keyframes backgroundMove {
       0% { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
-    .circle-text {
-      position: relative;
-      width: 80vmin;
-      height: 80vmin;
-      border-radius: 50%;
-      transform-style: preserve-3d;
+    .container {
+      text-align: center;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 2rem;
+      box-shadow: 0 0 30px rgba(0,0,0,0.3);
+      border: 2px solid rgba(255,255,255,0.2);
+      animation: fadeIn 2s ease-in-out;
     }
 
-    .circle-text span {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform-origin: 0 0;
-      font-size: 5vmin;
-      font-family: sans-serif;
-      font-weight: bold;
-      background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet, cyan, pink, lime, gold);
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 12vw;
+      margin: 0;
+      font-weight: 900;
+      background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet, pink, cyan, lime);
       background-size: 300% 300%;
+      background-position: center;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      pointer-events: none;
+      transition: background-position 0.05s;
+    }
+
+    p {
+      color: white;
+      font-size: 5vw;
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
-  <div class="circle-text" id="circleText"></div>
+  <div class="container">
+    <h1 id="title">Happy Birthday!</h1>
+    <p>Have the best day ever 🎉</p>
+  </div>
 
   <script>
-    const text = "🎉 Happy Birthday! 🎂 ";
-    const container = document.getElementById('circleText');
+    const title = document.getElementById('title');
 
-    // Create circular text
-    const chars = text.repeat(5).split(""); // Repeat to fill the circle
-    const total = chars.length;
-    chars.forEach((char, i) => {
-      const span = document.createElement("span");
-      span.textContent = char;
-      const angle = (360 / total) * i;
-      span.style.transform = `rotate(${angle}deg) translate(40vmin) rotate(${angle * -1}deg)`;
-      container.appendChild(span);
-    });
-
-    // Gyroscope gradient shift
     if (window.DeviceOrientationEvent) {
       window.addEventListener('deviceorientation', (e) => {
-        const gamma = e.gamma || 0; // left-right tilt [-90,90]
-        const beta = e.beta || 0;   // front-back tilt [-180,180]
+        const gamma = e.gamma || 0; // left/right [-90, 90]
+        const beta = e.beta || 0;   // front/back [-180, 180]
 
         const x = (gamma + 90) / 180;
         const y = (beta + 180) / 360;
 
-        const bgX = x * 300;
-        const bgY = y * 300;
+        const xShift = x * 300;
+        const yShift = y * 300;
 
-        container.querySelectorAll('span').forEach(span => {
-          span.style.backgroundPosition = `${bgX}% ${bgY}%`;
-        });
+        title.style.backgroundPosition = `${xShift}% ${yShift}%`;
       });
     } else {
-      alert("Your device doesn't support motion sensors.");
+      alert("Your device doesn't support gyroscope.");
     }
   </script>
 </body>
